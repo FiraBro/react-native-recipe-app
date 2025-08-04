@@ -11,6 +11,38 @@ const LoginSchema = Yup.object().shape({
 
 export default function LoginScreen({ navigation }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
+
+  const handleLogin = async (values, { setSubmitting, setErrors }) => {
+    try {
+      const response = await fetch(
+        "https://ecomerceapi-3.onrender.com/api/v1/users/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // 🔑 Important for cookie-based login
+          body: JSON.stringify(values),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrors({ password: data.message || "Login failed" });
+      } else {
+        console.log("Login success:", data);
+        // Navigate to the next screen (e.g., Home)
+        navigation.navigate("Main");
+      }
+    } catch (err) {
+      console.error(err);
+      setErrors({ password: "Something went wrong!" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -20,9 +52,7 @@ export default function LoginScreen({ navigation }) {
       <Formik
         initialValues={{ email: "", password: "" }}
         validationSchema={LoginSchema}
-        onSubmit={(values) => {
-          console.log("Login:", values);
-        }}
+        onSubmit={handleLogin}
       >
         {({
           handleChange,
@@ -31,6 +61,7 @@ export default function LoginScreen({ navigation }) {
           values,
           errors,
           touched,
+          isSubmitting,
         }) => (
           <View>
             <TextInput
@@ -70,6 +101,8 @@ export default function LoginScreen({ navigation }) {
               mode="contained"
               onPress={handleSubmit}
               style={styles.button}
+              disabled={isSubmitting}
+              loading={isSubmitting}
             >
               Login
             </Button>
