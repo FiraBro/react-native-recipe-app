@@ -12,6 +12,7 @@ import HomeScreen from "./src/screen/HomeScreen";
 import SearchScreen from "./src/screen/SearchScreen";
 import FavoritesScreen from "./src/screen/FavoriteScreen";
 import UploadProductScreen from "./src/screen/UploadProductScreen";
+import { UserProvider } from "./src/hooks/userContext";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -47,14 +48,16 @@ function MainTabs() {
 
 export default function App() {
   return (
-    <PaperProvider>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Signup" component={SignupScreen} />
-          <Stack.Screen name="Main" component={MainTabs} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </PaperProvider>
+    <UserProvider>
+      <PaperProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="Main" component={MainTabs} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PaperProvider>
+    </UserProvider>
   );
 }
