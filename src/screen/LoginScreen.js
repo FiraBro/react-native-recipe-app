@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { TextInput, Button, Text, Title } from "react-native-paper";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { UserContext } from "../hooks/userContext"; // ✅ Adjust path as needed
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
@@ -11,6 +12,7 @@ const LoginSchema = Yup.object().shape({
 
 export default function LoginScreen({ navigation }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const { setUser } = useContext(UserContext); // ✅ useContext to set logged-in user
 
   const handleLogin = async (values, { setSubmitting, setErrors }) => {
     try {
@@ -21,7 +23,7 @@ export default function LoginScreen({ navigation }) {
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", // 🔑 Important for cookie-based login
+          credentials: "include",
           body: JSON.stringify(values),
         }
       );
@@ -32,7 +34,7 @@ export default function LoginScreen({ navigation }) {
         setErrors({ password: data.message || "Login failed" });
       } else {
         console.log("Login success:", data);
-        // Navigate to the next screen (e.g., Home)
+        setUser(data); // ✅ Set user in context
         navigation.navigate("Main");
       }
     } catch (err) {
