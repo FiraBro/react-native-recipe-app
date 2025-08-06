@@ -15,7 +15,7 @@ export default function RecipeList({ categoryId }) {
       );
       const data = await res.json();
       setRecipes(data.products || []);
-      console.log("Fetched recipes:", data.products);
+      console.log("Fetched recipes:", data.products[0]);
     } catch (err) {
       console.error("Failed to fetch recipes", err);
       setError("Failed to load recipes");
