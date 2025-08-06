@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, Text, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { Svg, Path } from "react-native-svg";
 import RecipeList from "../components/RecipeList";
 import CategoryList from "../components/CategoryList";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { UserContext } from "../hooks/userContext";
 
 // 🐓 Chicken Icon
 const ChickenIcon = ({ width = 40, height = 40 }) => (
@@ -73,6 +74,7 @@ const SheepIcon = ({ width = 40, height = 40 }) => (
 );
 
 export default function HomeScreen() {
+  const { user } = useContext(UserContext);
   const [categories, setCategories] = useState([]);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeCategoryName, setActiveCategoryName] = useState("");
@@ -152,7 +154,9 @@ export default function HomeScreen() {
           : "Loading recipes..."}
       </Text>
 
-      {activeCategoryId && <RecipeList categoryId={activeCategoryId} />}
+      {activeCategoryId && (
+        <RecipeList categoryId={activeCategoryId} user={user} />
+      )}
     </SafeAreaView>
   );
 }
