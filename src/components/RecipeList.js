@@ -94,29 +94,29 @@ export default function RecipeList({ categoryId, user }) {
       Alert.alert("Error", "Something went wrong.");
     }
   };
-
   const addToFavorites = async (productId) => {
     try {
       const res = await fetch(
-        `https://ecomerceapi-3.onrender.com/api/v1/favorites`,
+        "https://ecomerceapi-3.onrender.com/api/v1/favorites",
         {
           method: "POST",
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ productId }),
+          body: JSON.stringify({ productId }), // <-- Use productId, not itemId
         }
       );
       const data = await res.json();
       console.log("Add to favorites response:", data);
+
       if (res.ok) {
-        Alert.alert("Favorited", data.message || "Added to favorites.");
+        Alert.alert("Favorited", "Added to favorites.");
       } else {
         Alert.alert("Failed", data.message || "Could not add to favorites.");
       }
-    } catch (err) {
-      console.error("Add to favorite error", err);
+    } catch (error) {
+      console.error("Add to favorites error:", error);
       Alert.alert("Error", "Something went wrong.");
     }
   };
