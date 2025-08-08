@@ -20,7 +20,10 @@ export default function CartScreen() {
       <Image source={{ uri: item.image }} style={styles.image} />
       <View style={styles.info}>
         <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.price}>${item.price}</Text>
+        <Text style={styles.price}>
+          ${(item.price * item.quantity).toFixed(2)}
+        </Text>
+
         <View style={styles.buttonsContainer}>
           <Button mode="outlined" onPress={() => decreaseQuantity(item._id)}>
             -
