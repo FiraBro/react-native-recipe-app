@@ -13,14 +13,16 @@ export const FavoriteProvider = ({ children }) => {
         "https://ecomerceapi-3.onrender.com/api/v1/favorites",
         {
           method: "GET",
-          credentials: "include", // send cookies or auth headers if needed
+          credentials: "include",
         }
       );
       const data = await res.json();
       if (res.ok) {
-        // data.data.favorites is array of { _id, user, product: {...} }
-        // We want the product objects
-        const products = data.data.favorites.map((fav) => fav.product);
+        // Store both product and favoriteId
+        const products = data.data.favorites.map((fav) => ({
+          ...fav.product,
+          favoriteId: fav._id,
+        }));
         setFavorites(products);
       } else {
         setFavorites([]);
@@ -34,7 +36,6 @@ export const FavoriteProvider = ({ children }) => {
     }
   };
 
-  // Add product to favorites backend & local state
   const addToFavorites = async (product) => {
     if (!product || !product._id) return;
 
@@ -50,10 +51,14 @@ export const FavoriteProvider = ({ children }) => {
       );
       const data = await res.json();
       if (res.ok) {
-        // refresh from backend or just add locally:
+        const newFavorite = {
+          ...product,
+          favoriteId: data.data.favorite._id,
+        };
+
         setFavorites((prev) => {
           const exists = prev.some((item) => item._id === product._id);
-          return exists ? prev : [...prev, product];
+          return exists ? prev : [...prev, newFavorite];
         });
       } else {
         alert(data.message || "Failed to add favorite");
@@ -63,11 +68,10 @@ export const FavoriteProvider = ({ children }) => {
     }
   };
 
-  // Remove product from favorites backend & local state
-  const removeFromFavorites = async (productId) => {
+  const removeFromFavorites = async (favoriteId) => {
     try {
       const res = await fetch(
-        `https://ecomerceapi-3.onrender.com/api/v1/favorites/${productId}`,
+        `https://ecomerceapi-3.onrender.com/api/v1/favorites/${favoriteId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -75,7 +79,9 @@ export const FavoriteProvider = ({ children }) => {
       );
       const data = await res.json();
       if (res.ok) {
-        setFavorites((prev) => prev.filter((item) => item._id !== productId));
+        setFavorites((prev) =>
+          prev.filter((item) => item.favoriteId !== favoriteId)
+        );
       } else {
         alert(data.message || "Failed to remove favorite");
       }
