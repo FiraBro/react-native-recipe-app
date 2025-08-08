@@ -32,7 +32,13 @@ const FavoriteScreen = () => {
             {item.price ? `$${item.price}` : "Price Unavailable"}
           </Text>
           <Button
-            onPress={() => removeFromFavorites(item._id)}
+            onPress={() => {
+              if (!item.favoriteId) {
+                alert("Favorite ID not found");
+                return;
+              }
+              removeFromFavorites(item.favoriteId);
+            }}
             mode="outlined"
             icon="delete"
             style={styles.removeButton}
@@ -46,8 +52,8 @@ const FavoriteScreen = () => {
 
   return (
     <FlatList
-      data={favorites.filter(Boolean)}
-      keyExtractor={(item) => item._id}
+      data={favorites.filter((item) => item && item._id)}
+      keyExtractor={(item, index) => item?._id?.toString() || index.toString()}
       renderItem={renderItem}
       contentContainerStyle={{ padding: 16 }}
       ListEmptyComponent={<Text style={styles.empty}>No favorites yet</Text>}
