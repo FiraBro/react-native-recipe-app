@@ -4,7 +4,8 @@ import { Svg, Path } from "react-native-svg";
 import RecipeList from "../components/RecipeList";
 import CategoryList from "../components/CategoryList";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { UserContext } from "../hooks/userContext";
+import { UserContext } from "../contexts/userContext";
+import { ScrollView } from "react-native";
 
 // 🐓 Chicken Icon
 const ChickenIcon = ({ width = 40, height = 40 }) => (
@@ -128,35 +129,38 @@ export default function HomeScreen() {
         <SheepIcon />
       </View>
 
-      {/* Hero Image */}
-      {heroImageUrl && (
-        <Image
-          source={{ uri: heroImageUrl }}
-          style={styles.heroImage}
-          resizeMode="cover"
+      {/* Scrollable content below */}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Hero Image */}
+        {heroImageUrl && (
+          <Image
+            source={{ uri: heroImageUrl }}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
+        )}
+
+        {/* Category List */}
+        <CategoryList
+          categories={categories}
+          active={activeCategoryId}
+          onSelect={(cat) => {
+            setActiveCategoryId(cat._id);
+            setActiveCategoryName(cat.name);
+          }}
         />
-      )}
 
-      {/* Category List */}
-      <CategoryList
-        categories={categories}
-        active={activeCategoryId}
-        onSelect={(cat) => {
-          setActiveCategoryId(cat._id);
-          setActiveCategoryName(cat.name);
-        }}
-      />
+        {/* Recipes Section */}
+        <Text style={styles.sectionTitle}>
+          {activeCategoryName
+            ? `Recipes for ${activeCategoryName}`
+            : "Loading recipes..."}
+        </Text>
 
-      {/* Recipes Section */}
-      <Text style={styles.sectionTitle}>
-        {activeCategoryName
-          ? `Recipes for ${activeCategoryName}`
-          : "Loading recipes..."}
-      </Text>
-
-      {activeCategoryId && (
-        <RecipeList categoryId={activeCategoryId} user={user} />
-      )}
+        {activeCategoryId && (
+          <RecipeList categoryId={activeCategoryId} user={user} />
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
