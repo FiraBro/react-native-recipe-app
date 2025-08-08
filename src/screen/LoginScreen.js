@@ -3,7 +3,7 @@ import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { TextInput, Button, Text, Title } from "react-native-paper";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { UserContext } from "../hooks/userContext"; // ✅ Adjust path as needed
+import { UserContext } from "../contexts/userContext"; // ✅ Adjust path as needed
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required"),
