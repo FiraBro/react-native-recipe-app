@@ -5,7 +5,6 @@ export const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
-  // Fetch cart items from backend
   const fetchCart = async () => {
     try {
       const res = await fetch(
@@ -16,8 +15,6 @@ export const CartProvider = ({ children }) => {
         }
       );
       const data = await res.json();
-      console.log("Cart data:", data);
-
       if (res.ok && data.data && data.data.items) {
         const items = data.data.items.map((item) => ({
           _id: item.product._id,
@@ -35,7 +32,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Call this on mount to load cart initially
   useEffect(() => {
     fetchCart();
   }, []);
@@ -55,9 +51,7 @@ export const CartProvider = ({ children }) => {
       );
 
       const data = await res.json();
-
       if (res.ok) {
-        // Refresh cart after adding
         await fetchCart();
       } else {
         alert(data.message || "Failed to add to cart");
@@ -67,10 +61,82 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Similarly, implement increaseQty and decreaseQty by calling backend and refetching cart
+  const increaseQuantity = async (productId) => {
+    try {
+      // Find current quantity for productId
+      const currentItem = cartItems.find((item) => item._id === productId);
+      if (!currentItem) return;
+
+      const newQuantity = currentItem.quantity + 1;
+
+      const res = await fetch(
+        "https://ecomerceapi-3.onrender.com/api/v1/cart/update",
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId, quantity: newQuantity }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        await fetchCart();
+      } else {
+        alert(data.message || "Failed to increase quantity");
+      }
+    } catch (error) {
+      console.error("Increase quantity error", error);
+    }
+  };
+
+  const decreaseQuantity = async (productId) => {
+    try {
+      const currentItem = cartItems.find((item) => item._id === productId);
+      if (!currentItem) return;
+
+      const newQuantity = currentItem.quantity - 1;
+
+      // If quantity drops to 0 or less, optionally remove from cart or set to 1
+      if (newQuantity <= 0) {
+        // Optionally remove from cart here (implement a remove function)
+        alert("Quantity cannot be less than 1");
+        return;
+      }
+
+      const res = await fetch(
+        "https://ecomerceapi-3.onrender.com/api/v1/cart/update",
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productId, quantity: newQuantity }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        await fetchCart();
+      } else {
+        alert(data.message || "Failed to decrease quantity");
+      }
+    } catch (error) {
+      console.error("Decrease quantity error", error);
+    }
+  };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, fetchCart }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        addToCart,
+        fetchCart,
+        increaseQuantity,
+        decreaseQuantity, // 🛠️ this was missing
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
