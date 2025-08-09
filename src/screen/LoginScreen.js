@@ -35,7 +35,6 @@ export default function LoginScreen({ navigation }) {
       } else {
         console.log("Login success:", data);
         setUser(data); // ✅ Set user in context
-        navigation.navigate("Main");
       }
     } catch (err) {
       console.error(err);
