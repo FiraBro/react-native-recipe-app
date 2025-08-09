@@ -13,6 +13,7 @@ import SearchScreen from "./src/screen/SearchScreen";
 import UploadProductScreen from "./src/screen/UploadProductScreen";
 import FavoriteScreen from "./src/screen/FavoriteScreen";
 import CartScreen from "./src/screen/CartScreen";
+import PaymentSuccess from "./src/components/PaymentSuccess"; // ✅ Added
 
 // Context Providers
 import { UserProvider, UserContext } from "./src/contexts/userContext";
@@ -75,6 +76,10 @@ export default function App() {
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Signup" component={SignupScreen} />
                 <Stack.Screen name="Main" component={MainTabs} />
+                <Stack.Screen
+                  name="PaymentSuccess"
+                  component={PaymentSuccess} // ✅ Added here
+                />
               </Stack.Navigator>
             </NavigationContainer>
           </PaperProvider>
