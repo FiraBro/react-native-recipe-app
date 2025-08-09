@@ -5,14 +5,18 @@ import { CartContext } from "../contexts/cartContext";
 import { useFocusEffect } from "@react-navigation/native";
 
 export default function CartScreen({ navigation }) {
-  const { cartItems, increaseQuantity, decreaseQuantity, fetchCart } =
-    useContext(CartContext);
+  const {
+    cartItems,
+    increaseQuantity,
+    decreaseQuantity,
+    fetchCart,
+    removeFromCart, // add here
+  } = useContext(CartContext);
 
-  // This runs every time the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       if (fetchCart) {
-        fetchCart(); // If your context has a fetch method, call it to reload data
+        fetchCart();
       }
     }, [fetchCart])
   );
@@ -33,6 +37,15 @@ export default function CartScreen({ navigation }) {
           <Text style={styles.quantity}>{item.quantity}</Text>
           <Button mode="outlined" onPress={() => increaseQuantity(item._id)}>
             +
+          </Button>
+          {/* Delete button */}
+          <Button
+            mode="text"
+            onPress={() => removeFromCart(item._id)}
+            textColor="red"
+            style={{ marginLeft: 10 }}
+          >
+            Delete
           </Button>
         </View>
       </View>
