@@ -13,8 +13,7 @@ import SearchScreen from "./src/screen/SearchScreen";
 import UploadProductScreen from "./src/screen/UploadProductScreen";
 import FavoriteScreen from "./src/screen/FavoriteScreen";
 import CartScreen from "./src/screen/CartScreen";
-import PaymentSuccess from "./src/components/PaymentSuccess"; // ✅ Added
-
+import PaymentSuccessScreen from "./src/screen/PaymentSuccessScreen";
 // Context Providers
 import { UserProvider, UserContext } from "./src/contexts/userContext";
 import { CartProvider } from "./src/contexts/cartContext";
@@ -62,6 +61,34 @@ function MainTabs() {
   );
 }
 
+function AuthNavigator() {
+  const { user, loading } = useContext(UserContext);
+
+  if (loading) {
+    // You could replace this with a splash screen
+    return <></>;
+  }
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {user ? (
+        <>
+          <Stack.Screen name="Main" component={MainTabs} />
+          <Stack.Screen
+            name="PaymentSuccess"
+            component={PaymentSuccessScreen}
+          />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+        </>
+      )}
+    </Stack.Navigator>
+  );
+}
+
 export default function App() {
   return (
     <UserProvider>
@@ -69,18 +96,7 @@ export default function App() {
         <FavoriteProvider>
           <PaperProvider>
             <NavigationContainer>
-              <Stack.Navigator
-                initialRouteName="Login"
-                screenOptions={{ headerShown: false }}
-              >
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="Signup" component={SignupScreen} />
-                <Stack.Screen name="Main" component={MainTabs} />
-                <Stack.Screen
-                  name="PaymentSuccess"
-                  component={PaymentSuccess} // ✅ Added here
-                />
-              </Stack.Navigator>
+              <AuthNavigator />
             </NavigationContainer>
           </PaperProvider>
         </FavoriteProvider>
