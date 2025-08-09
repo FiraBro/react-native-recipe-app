@@ -1,17 +1,15 @@
-// CartScreen.js
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import {
   View,
   Text,
   FlatList,
-  TouchableOpacity,
   StyleSheet,
   Image,
 } from "react-native";
 import { Button } from "react-native-paper";
 import { CartContext } from "../contexts/cartContext";
 
-export default function CartScreen() {
+export default function CartScreen({ navigation }) {
   const { cartItems, increaseQuantity, decreaseQuantity } =
     useContext(CartContext);
 
@@ -37,11 +35,14 @@ export default function CartScreen() {
     </View>
   );
 
+  const totalPrice = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20 }}>
-        Your Cart
-      </Text>
+      <Text style={styles.header}>Your Cart</Text>
       {cartItems.length === 0 && (
         <Text style={{ textAlign: "center", marginTop: 20 }}>
           Your cart is empty
@@ -54,6 +55,18 @@ export default function CartScreen() {
         renderItem={renderItem}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
+
+      {cartItems.length > 0 && (
+        <View style={styles.footer}>
+          <Text style={styles.total}>Total: ${totalPrice.toFixed(2)}</Text>
+          <Button
+            mode="contained"
+            onPress={() => navigation.navigate("PaymentSuccess")}
+          >
+            Buy Now
+          </Button>
+        </View>
+      )}
     </View>
   );
 }
@@ -64,6 +77,11 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#fff",
     marginTop: 40,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
   },
   card: {
     flexDirection: "row",
@@ -102,5 +120,16 @@ const styles = StyleSheet.create({
   quantity: {
     marginHorizontal: 12,
     fontSize: 16,
+  },
+  footer: {
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+    paddingTop: 10,
+    alignItems: "center",
+  },
+  total: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
 });
