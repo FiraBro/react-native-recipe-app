@@ -1,17 +1,21 @@
-import React, { useContext } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  Image,
-} from "react-native";
+import React, { useContext, useCallback } from "react";
+import { View, Text, FlatList, StyleSheet, Image } from "react-native";
 import { Button } from "react-native-paper";
 import { CartContext } from "../contexts/cartContext";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function CartScreen({ navigation }) {
-  const { cartItems, increaseQuantity, decreaseQuantity } =
+  const { cartItems, increaseQuantity, decreaseQuantity, fetchCart } =
     useContext(CartContext);
+
+  // This runs every time the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      if (fetchCart) {
+        fetchCart(); // If your context has a fetch method, call it to reload data
+      }
+    }, [fetchCart])
+  );
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
