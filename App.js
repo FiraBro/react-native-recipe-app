@@ -14,6 +14,8 @@ import UploadProductScreen from "./src/screen/UploadProductScreen";
 import FavoriteScreen from "./src/screen/FavoriteScreen";
 import CartScreen from "./src/screen/CartScreen";
 import PaymentSuccessScreen from "./src/screen/PaymentSuccessScreen";
+import AccountScreen from "./src/screen/AccountScreen"; // <-- Import here
+
 // Context Providers
 import { UserProvider, UserContext } from "./src/contexts/userContext";
 import { CartProvider } from "./src/contexts/cartContext";
@@ -42,6 +44,8 @@ function MainTabs() {
             iconName = focused ? "cloud-upload" : "cloud-upload-outline";
           } else if (route.name === "Cart") {
             iconName = focused ? "cart" : "cart-outline";
+          } else if (route.name === "Account") {
+            iconName = focused ? "person" : "person-outline";
           }
 
           return <Icon name={iconName} size={size} color={color} />;
@@ -52,8 +56,15 @@ function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
-      <Tab.Screen name="Favorite" component={FavoriteScreen} />
-      <Tab.Screen name="Cart" component={CartScreen} />
+      {/* Only show Favorite if NOT admin */}
+      {user?.role !== "admin" && (
+        <Tab.Screen name="Favorite" component={FavoriteScreen} />
+      )}
+      {/* Only show Cart if NOT admin */}
+      {user?.role !== "admin" && (
+        <Tab.Screen name="Cart" component={CartScreen} />
+      )}
+      <Tab.Screen name="Account" component={AccountScreen} />
       {user?.role === "admin" && (
         <Tab.Screen name="Upload" component={UploadProductScreen} />
       )}
@@ -64,10 +75,7 @@ function MainTabs() {
 function AuthNavigator() {
   const { user, loading } = useContext(UserContext);
 
-  if (loading) {
-    // You could replace this with a splash screen
-    return <></>;
-  }
+  if (loading) return null;
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
