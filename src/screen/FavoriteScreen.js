@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,36 +9,38 @@ import {
 } from "react-native";
 import { FavoriteContext } from "../contexts/favoriteContext";
 import { Button } from "react-native-paper";
+import { useFocusEffect } from "@react-navigation/native";
 
 const FavoriteScreen = () => {
-  const { favorites, removeFromFavorites, loading } =
+  const { favorites, removeFromFavorites, loading, fetchFavorites } =
     useContext(FavoriteContext);
 
-  if (loading) {
-    return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
-  }
+  useFocusEffect(
+    useCallback(() => {
+      fetchFavorites();
+    }, [fetchFavorites])
+  );
 
   const renderItem = ({ item }) => {
-    if (!item) return null;
+    if (!item || !item.product) return null;
+
     return (
       <View style={styles.card}>
         <Image
-          source={{ uri: item.image || "https://via.placeholder.com/100" }}
+          source={{
+            uri: item.product.image || "https://via.placeholder.com/100",
+          }}
           style={styles.image}
         />
         <View style={styles.info}>
-          <Text style={styles.title}>{item.title || "No Title"}</Text>
+          <Text style={styles.title}>{item.product.title || "No Title"}</Text>
           <Text style={styles.price}>
-            {item.price ? `$${item.price}` : "Price Unavailable"}
+            {item.product.price
+              ? `$${item.product.price}`
+              : "Price Unavailable"}
           </Text>
           <Button
-            onPress={() => {
-              if (!item.favoriteId) {
-                alert("Favorite ID not found");
-                return;
-              }
-              removeFromFavorites(item.favoriteId);
-            }}
+            onPress={() => removeFromFavorites(item._id)}
             mode="outlined"
             icon="delete"
             style={styles.removeButton}
@@ -50,10 +52,14 @@ const FavoriteScreen = () => {
     );
   };
 
+  if (loading) {
+    return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
+  }
+
   return (
     <FlatList
-      data={favorites.filter((item) => item && item._id)}
-      keyExtractor={(item, index) => item?._id?.toString() || index.toString()}
+      data={favorites.filter((item) => item && item._id && item.product)}
+      keyExtractor={(item) => item._id.toString()}
       renderItem={renderItem}
       contentContainerStyle={{ padding: 16 }}
       ListEmptyComponent={<Text style={styles.empty}>No favorites yet</Text>}
