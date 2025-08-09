@@ -1,72 +1,48 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useCallback } from "react";
 
 export const FavoriteContext = createContext();
 
 export const FavoriteProvider = ({ children }) => {
   const [favorites, setFavorites] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch favorites from backend
-  const fetchFavorites = async () => {
+  const fetchFavorites = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await fetch(
         "https://ecomerceapi-3.onrender.com/api/v1/favorites",
         {
-          method: "GET",
           credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
       const data = await res.json();
-      if (res.ok) {
-        // Store both product and favoriteId
-        const products = data.data.favorites.map((fav) => ({
-          ...fav.product,
-          favoriteId: fav._id,
-        }));
-        setFavorites(products);
+      console.log(
+        "Fetched favorites:",
+        JSON.stringify(data.data.favorites, null, 2)
+      );
+
+      if (res.ok && data.data && Array.isArray(data.data.favorites)) {
+        setFavorites(data.data.favorites);
       } else {
         setFavorites([]);
-        console.error("Fetch favorites failed:", data.message);
+        console.error(
+          "Failed to fetch favorites or data.favorites is not an array",
+          data
+        );
       }
-    } catch (err) {
-      console.error("Error fetching favorites:", err);
-      setFavorites([]);
+    } catch (error) {
+      console.error("Fetch favorites error", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // no dependencies, stable function
 
-  const addToFavorites = async (product) => {
-    if (!product || !product._id) return;
-
-    try {
-      const res = await fetch(
-        "https://ecomerceapi-3.onrender.com/api/v1/favorites",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productId: product._id }),
-        }
-      );
-      const data = await res.json();
-      if (res.ok) {
-        const newFavorite = {
-          ...product,
-          favoriteId: data.data.favorite._id,
-        };
-
-        setFavorites((prev) => {
-          const exists = prev.some((item) => item._id === product._id);
-          return exists ? prev : [...prev, newFavorite];
-        });
-      } else {
-        alert(data.message || "Failed to add favorite");
-      }
-    } catch (err) {
-      console.error("Add to favorites error:", err);
-    }
-  };
+  useEffect(() => {
+    fetchFavorites();
+  }, [fetchFavorites]); // only runs once, fetchFavorites is stable
 
   const removeFromFavorites = async (favoriteId) => {
     try {
@@ -75,28 +51,25 @@ export const FavoriteProvider = ({ children }) => {
         {
           method: "DELETE",
           credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
       const data = await res.json();
       if (res.ok) {
-        setFavorites((prev) =>
-          prev.filter((item) => item.favoriteId !== favoriteId)
-        );
+        await fetchFavorites(); // refresh after delete
       } else {
         alert(data.message || "Failed to remove favorite");
       }
-    } catch (err) {
-      console.error("Remove from favorites error:", err);
+    } catch (error) {
+      console.error("Remove favorite error", error);
     }
   };
 
-  useEffect(() => {
-    fetchFavorites();
-  }, []);
-
   return (
     <FavoriteContext.Provider
-      value={{ favorites, addToFavorites, removeFromFavorites, loading }}
+      value={{ favorites, loading, fetchFavorites, removeFromFavorites }}
     >
       {children}
     </FavoriteContext.Provider>
